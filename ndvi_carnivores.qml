@@ -1,0 +1,166 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis version="2.14.18-Essen" minimumScale="0" maximumScale="1e+08" hasScaleBasedVisibilityFlag="0">
+  <pipe>
+    <rasterrenderer opacity="1" alphaBand="-1" classificationMax="0.477943" classificationMinMaxOrigin="CumulativeCutFullExtentEstimated" band="1" classificationMin="0.0673894" type="singlebandpseudocolor">
+      <rasterTransparency/>
+      <rastershader>
+        <colorrampshader colorRampType="INTERPOLATED" clip="0">
+          <item alpha="255" value="0.067389" label="0.067389" color="#1f78b4"/>
+          <item alpha="255" value="0.070145" label="0.070145" color="#3b88a8"/>
+          <item alpha="255" value="0.0729" label="0.072900" color="#57999c"/>
+          <item alpha="255" value="0.075656" label="0.075656" color="#73a990"/>
+          <item alpha="255" value="0.078411" label="0.078411" color="#8fba85"/>
+          <item alpha="255" value="0.081166" label="0.081166" color="#abcb79"/>
+          <item alpha="255" value="0.083922" label="0.083922" color="#c8db6d"/>
+          <item alpha="255" value="0.086677" label="0.086677" color="#e4ec62"/>
+          <item alpha="255" value="0.089433" label="0.089433" color="#f0f365"/>
+          <item alpha="255" value="0.092188" label="0.092188" color="#f0f175"/>
+          <item alpha="255" value="0.094943" label="0.094943" color="#efef86"/>
+          <item alpha="255" value="0.097699" label="0.097699" color="#efee96"/>
+          <item alpha="255" value="0.100454" label="0.100454" color="#efeca6"/>
+          <item alpha="255" value="0.10321" label="0.103210" color="#eeebb6"/>
+          <item alpha="255" value="0.105965" label="0.105965" color="#eee9c6"/>
+          <item alpha="255" value="0.10872" label="0.108720" color="#ede7d4"/>
+          <item alpha="255" value="0.111476" label="0.111476" color="#ebe7d2"/>
+          <item alpha="255" value="0.114231" label="0.114231" color="#e9e7cf"/>
+          <item alpha="255" value="0.116986" label="0.116986" color="#e7e7cc"/>
+          <item alpha="255" value="0.119742" label="0.119742" color="#e5e7c9"/>
+          <item alpha="255" value="0.122497" label="0.122497" color="#e3e7c7"/>
+          <item alpha="255" value="0.125253" label="0.125253" color="#e1e7c4"/>
+          <item alpha="255" value="0.128008" label="0.128008" color="#e0e7c1"/>
+          <item alpha="255" value="0.130763" label="0.130763" color="#dee7bf"/>
+          <item alpha="255" value="0.133519" label="0.133519" color="#dce7bc"/>
+          <item alpha="255" value="0.136274" label="0.136274" color="#dae7b9"/>
+          <item alpha="255" value="0.13903" label="0.139030" color="#d8e7b7"/>
+          <item alpha="255" value="0.141785" label="0.141785" color="#d6e6b4"/>
+          <item alpha="255" value="0.14454" label="0.144540" color="#d4e6b1"/>
+          <item alpha="255" value="0.147296" label="0.147296" color="#d2e6af"/>
+          <item alpha="255" value="0.150051" label="0.150051" color="#d0e6ac"/>
+          <item alpha="255" value="0.152807" label="0.152807" color="#cee6a9"/>
+          <item alpha="255" value="0.155562" label="0.155562" color="#cce6a7"/>
+          <item alpha="255" value="0.158317" label="0.158317" color="#cae6a4"/>
+          <item alpha="255" value="0.161073" label="0.161073" color="#c8e6a1"/>
+          <item alpha="255" value="0.163828" label="0.163828" color="#c6e69f"/>
+          <item alpha="255" value="0.166584" label="0.166584" color="#c4e69c"/>
+          <item alpha="255" value="0.169339" label="0.169339" color="#c2e699"/>
+          <item alpha="255" value="0.172094" label="0.172094" color="#c0e598"/>
+          <item alpha="255" value="0.17485" label="0.174850" color="#bee497"/>
+          <item alpha="255" value="0.177605" label="0.177605" color="#bce396"/>
+          <item alpha="255" value="0.180361" label="0.180361" color="#bae295"/>
+          <item alpha="255" value="0.183116" label="0.183116" color="#b8e194"/>
+          <item alpha="255" value="0.185871" label="0.185871" color="#b6e194"/>
+          <item alpha="255" value="0.188627" label="0.188627" color="#b4e093"/>
+          <item alpha="255" value="0.191382" label="0.191382" color="#b2df92"/>
+          <item alpha="255" value="0.194137" label="0.194137" color="#b0de91"/>
+          <item alpha="255" value="0.196893" label="0.196893" color="#aedd90"/>
+          <item alpha="255" value="0.199648" label="0.199648" color="#acdc8f"/>
+          <item alpha="255" value="0.202404" label="0.202404" color="#aadb8e"/>
+          <item alpha="255" value="0.205159" label="0.205159" color="#a8db8e"/>
+          <item alpha="255" value="0.207914" label="0.207914" color="#a6da8d"/>
+          <item alpha="255" value="0.21067" label="0.210670" color="#a4d98c"/>
+          <item alpha="255" value="0.213425" label="0.213425" color="#a2d88b"/>
+          <item alpha="255" value="0.216181" label="0.216181" color="#a0d78a"/>
+          <item alpha="255" value="0.218936" label="0.218936" color="#9ed689"/>
+          <item alpha="255" value="0.221691" label="0.221691" color="#9cd588"/>
+          <item alpha="255" value="0.224447" label="0.224447" color="#9ad588"/>
+          <item alpha="255" value="0.227202" label="0.227202" color="#98d487"/>
+          <item alpha="255" value="0.229958" label="0.229958" color="#96d386"/>
+          <item alpha="255" value="0.232713" label="0.232713" color="#94d285"/>
+          <item alpha="255" value="0.235468" label="0.235468" color="#92d184"/>
+          <item alpha="255" value="0.238224" label="0.238224" color="#90d083"/>
+          <item alpha="255" value="0.240979" label="0.240979" color="#8ecf82"/>
+          <item alpha="255" value="0.243735" label="0.243735" color="#8ccf82"/>
+          <item alpha="255" value="0.24649" label="0.246490" color="#8ace81"/>
+          <item alpha="255" value="0.249245" label="0.249245" color="#88cd80"/>
+          <item alpha="255" value="0.252001" label="0.252001" color="#86cc7f"/>
+          <item alpha="255" value="0.254756" label="0.254756" color="#84cb7e"/>
+          <item alpha="255" value="0.257512" label="0.257512" color="#82ca7d"/>
+          <item alpha="255" value="0.260267" label="0.260267" color="#80c97c"/>
+          <item alpha="255" value="0.263022" label="0.263022" color="#7ec97c"/>
+          <item alpha="255" value="0.265778" label="0.265778" color="#7cc87b"/>
+          <item alpha="255" value="0.268533" label="0.268533" color="#7ac77a"/>
+          <item alpha="255" value="0.271289" label="0.271289" color="#78c679"/>
+          <item alpha="255" value="0.274044" label="0.274044" color="#77c578"/>
+          <item alpha="255" value="0.276799" label="0.276799" color="#75c477"/>
+          <item alpha="255" value="0.279555" label="0.279555" color="#73c376"/>
+          <item alpha="255" value="0.28231" label="0.282310" color="#71c275"/>
+          <item alpha="255" value="0.285065" label="0.285065" color="#6fc174"/>
+          <item alpha="255" value="0.287821" label="0.287821" color="#6dc073"/>
+          <item alpha="255" value="0.290576" label="0.290576" color="#6bbf72"/>
+          <item alpha="255" value="0.293332" label="0.293332" color="#69be71"/>
+          <item alpha="255" value="0.296087" label="0.296087" color="#67be70"/>
+          <item alpha="255" value="0.298842" label="0.298842" color="#65bd6f"/>
+          <item alpha="255" value="0.301598" label="0.301598" color="#63bc6e"/>
+          <item alpha="255" value="0.304353" label="0.304353" color="#62bb6d"/>
+          <item alpha="255" value="0.307109" label="0.307109" color="#60ba6c"/>
+          <item alpha="255" value="0.309864" label="0.309864" color="#5eb96b"/>
+          <item alpha="255" value="0.312619" label="0.312619" color="#5cb86a"/>
+          <item alpha="255" value="0.315375" label="0.315375" color="#5ab769"/>
+          <item alpha="255" value="0.31813" label="0.318130" color="#58b668"/>
+          <item alpha="255" value="0.320886" label="0.320886" color="#56b567"/>
+          <item alpha="255" value="0.323641" label="0.323641" color="#54b466"/>
+          <item alpha="255" value="0.326396" label="0.326396" color="#52b365"/>
+          <item alpha="255" value="0.329152" label="0.329152" color="#50b264"/>
+          <item alpha="255" value="0.331907" label="0.331907" color="#4fb163"/>
+          <item alpha="255" value="0.334663" label="0.334663" color="#4db062"/>
+          <item alpha="255" value="0.337418" label="0.337418" color="#4baf61"/>
+          <item alpha="255" value="0.340173" label="0.340173" color="#49ae60"/>
+          <item alpha="255" value="0.342929" label="0.342929" color="#47ae5f"/>
+          <item alpha="255" value="0.345684" label="0.345684" color="#45ad5e"/>
+          <item alpha="255" value="0.34844" label="0.348440" color="#43ac5d"/>
+          <item alpha="255" value="0.351195" label="0.351195" color="#41ab5c"/>
+          <item alpha="255" value="0.35395" label="0.353950" color="#3faa5b"/>
+          <item alpha="255" value="0.356706" label="0.356706" color="#3da95a"/>
+          <item alpha="255" value="0.359461" label="0.359461" color="#3ba859"/>
+          <item alpha="255" value="0.362216" label="0.362216" color="#3aa758"/>
+          <item alpha="255" value="0.364972" label="0.364972" color="#38a657"/>
+          <item alpha="255" value="0.367727" label="0.367727" color="#36a556"/>
+          <item alpha="255" value="0.370483" label="0.370483" color="#34a455"/>
+          <item alpha="255" value="0.373238" label="0.373238" color="#32a354"/>
+          <item alpha="255" value="0.375993" label="0.375993" color="#30a253"/>
+          <item alpha="255" value="0.378749" label="0.378749" color="#2fa153"/>
+          <item alpha="255" value="0.381504" label="0.381504" color="#2e9f52"/>
+          <item alpha="255" value="0.38426" label="0.384260" color="#2c9d51"/>
+          <item alpha="255" value="0.387015" label="0.387015" color="#2b9c50"/>
+          <item alpha="255" value="0.38977" label="0.389770" color="#2a9a4f"/>
+          <item alpha="255" value="0.392526" label="0.392526" color="#28994f"/>
+          <item alpha="255" value="0.395281" label="0.395281" color="#27974e"/>
+          <item alpha="255" value="0.398037" label="0.398037" color="#26954d"/>
+          <item alpha="255" value="0.400792" label="0.400792" color="#24944c"/>
+          <item alpha="255" value="0.403547" label="0.403547" color="#23924c"/>
+          <item alpha="255" value="0.406303" label="0.406303" color="#22914b"/>
+          <item alpha="255" value="0.409058" label="0.409058" color="#208f4a"/>
+          <item alpha="255" value="0.411814" label="0.411814" color="#1f8e49"/>
+          <item alpha="255" value="0.414569" label="0.414569" color="#1e8c48"/>
+          <item alpha="255" value="0.417324" label="0.417324" color="#1c8a48"/>
+          <item alpha="255" value="0.42008" label="0.420080" color="#1b8947"/>
+          <item alpha="255" value="0.422835" label="0.422835" color="#1a8746"/>
+          <item alpha="255" value="0.425591" label="0.425591" color="#188645"/>
+          <item alpha="255" value="0.428346" label="0.428346" color="#178445"/>
+          <item alpha="255" value="0.431101" label="0.431101" color="#168244"/>
+          <item alpha="255" value="0.433857" label="0.433857" color="#158143"/>
+          <item alpha="255" value="0.436612" label="0.436612" color="#137f42"/>
+          <item alpha="255" value="0.439367" label="0.439367" color="#127e41"/>
+          <item alpha="255" value="0.442123" label="0.442123" color="#117c41"/>
+          <item alpha="255" value="0.444878" label="0.444878" color="#0f7b40"/>
+          <item alpha="255" value="0.447634" label="0.447634" color="#0e793f"/>
+          <item alpha="255" value="0.450389" label="0.450389" color="#0d773e"/>
+          <item alpha="255" value="0.453144" label="0.453144" color="#0b763e"/>
+          <item alpha="255" value="0.4559" label="0.455900" color="#0a743d"/>
+          <item alpha="255" value="0.458655" label="0.458655" color="#09733c"/>
+          <item alpha="255" value="0.461411" label="0.461411" color="#07713b"/>
+          <item alpha="255" value="0.464166" label="0.464166" color="#066f3a"/>
+          <item alpha="255" value="0.466921" label="0.466921" color="#056e3a"/>
+          <item alpha="255" value="0.469677" label="0.469677" color="#036c39"/>
+          <item alpha="255" value="0.472432" label="0.472432" color="#026b38"/>
+          <item alpha="255" value="0.475188" label="0.475188" color="#016937"/>
+          <item alpha="255" value="0.477943" label="0.477943" color="#006837"/>
+        </colorrampshader>
+      </rastershader>
+    </rasterrenderer>
+    <brightnesscontrast brightness="0" contrast="0"/>
+    <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+    <rasterresampler maxOversampling="2"/>
+  </pipe>
+  <blendMode>0</blendMode>
+</qgis>

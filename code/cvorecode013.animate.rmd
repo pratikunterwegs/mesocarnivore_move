@@ -1,0 +1,55 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+## load full data
+
+```{r}
+load("animate.rdata.RData")
+library(moveVis)
+```
+
+# call animate raster
+
+```{r}
+#'call animate raster
+gc()
+animate_move(m = cvore.move, 
+             out_dir = "~/Documents/vanak_mesocarnivores/animate/", 
+             layer = landuse,
+             time_bar_col = 1,
+             north_col = 1,
+             layer_type = "discrete", 
+             layer_col = pal,
+             frames_tres = 3600,
+             #static_data = settle, 
+             conv_dir = conv_dir, 
+             #tail_elements = 10,
+             frames_fps = 25,
+             #stats_create = T,
+             #stats_type = "bar",
+             #static_gg = geom_point(),
+             #stats_gg = stats_gg,
+             paths_mode = "true_data",
+             paths_col = pal.indiv,
+             frames_nmax = 500,
+             img_caption = "Projection: UTM 43N; Sources: Movebank 2018; Sentinel 2 data", 
+             img_title = "Movement of mesocarnivores in human dominated landscapes in India", 
+             img_sub = img_sub, 
+             log_level = 1, 
+             out_format = "gif",
+             overwrite = T,
+             out_name = "landuse_animate2")
+gc()          
+```
+

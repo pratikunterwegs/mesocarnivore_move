@@ -1,0 +1,126 @@
+Indian Mesocarnivores Study
+===
+author: 
+date: 
+autosize: true
+width: 1440
+height: 900
+
+Landscape
+====
+
+```{r echo=FALSE, out.width = "800px"}
+library(knitr)
+include_graphics("landscape.fig.png")
+```
+
+
+10m NDVI values (low = brown, high = green), roads (black lines), settlements (yellow pentagons), ground-truth points (purple dots), reserve forest boundary (black polygon), water (blue).
+
+Landuse
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("landuse.fig.png")
+```
+
+Random forest classified 10m landuse (bare = white, yellow = grassland, light green = open agriculture, dark green = dense agriculture, blue = water)
+
+Carnivore data collection
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("fix.heatmap.day.png")
+```
+
+Fixes per Julian day
+
+Carnivore activity over the day
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("density.hour.png")
+```
+
+NB: Acitivty proxied by time between fixes, higher activity = higher fix frequency mode. Not applicable to some (?)
+
+Carnivore space use: Tracks
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("carnivore_movement.png")
+```
+
+Carnivore movement tracks (grey lines)
+
+Carnivore home ranges
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("carnivore_kde.png")
+```
+
+95% KDE hulls (yellow = jungle cat, green = fox, purple = jackal)
+
+Landscape availability & use
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("ndvi_avail_used.png")
+```
+
+NDVI available (black line) and used (coloured density plots)
+
+Carnivore residence time
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("carnivore_residence.png")
+```
+
+Residence time 200m (yellow = jungle cat, green = fox, purple = jackal; bright = high, dull = low)
+
+Carnivore revisits
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("carnivore_revisits.png")
+```
+
+Revisits w/i 200m (yellow = jungle cat, green = fox, purple = jackal; bright = high, dull = low)
+
+Landscape productivity & movement
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("movevars.ndvi.png")
+```
+
+Landuse & movement
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("residence.landuse.png")
+```
+
+Key: yellow = jungle cat, green = fox, purple = jackal
+
+***
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("revisits.landuse.png")
+```
+
+Human settlements & movement
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("movevars.settlement.png")
+```
+
+Overlap with other carnivores
+===
+
+```{r echo=FALSE, out.width = "800px"}
+include_graphics("movevars.overlap.png")
+```

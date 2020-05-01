@@ -1,0 +1,46 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+## load data
+
+```{r}
+#'load from robject
+load("cvore.rdata")
+```
+
+# prep for recurse
+
+```{r}
+for(i in 1:18){
+  source("libs.R")
+  load("cvore.rdata")
+library(recurse)
+
+cvore = data.frame(cvore)
+#fewest.points = which.min(lapply(cvore, function(x) dim(x)[1]))
+
+cvore = cvore %>% dlply("id") %>% map(function(x) arrange(x, time))
+
+  cvore.recurse = getRecursions(cvore[[i]][c("xutm","yutm","time","id")], radius = 200, timeunits = "hours")
+  
+  write.csv(cbind(revisits = cvore.recurse$revisits, residence = cvore.recurse$residenceTime, id = names(cvore)[i], time = cvore[[i]]$time), file = paste("cvore_revisit",i,".csv", sep ="_" ), row.names = F)
+  
+  write.csv(cvore.recurse$revisitStats, file = paste("cvore_recurse",i,".csv", sep ="_" ), row.names = F)
+  rm(list = ls(all.names = T))
+  gc()
+  
+}
+
+```
+

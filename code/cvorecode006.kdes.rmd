@@ -1,0 +1,113 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+## load revisit data
+
+```{r}
+#'from rdata
+load("cvore.revisits.rdata")
+
+#'make move and split
+library(move)
+```
+
+```{r} 
+#'get crs 
+utm43n = "+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs" 
+
+#'load reference raster as evi 
+cvore.landuse = raster("cvore.landuse.tif") 
+``` 
+ 
+# kdes
+
+## prep data for kdes
+
+```{r}
+#'try either ks or adehabitat
+library(adehabitatHR)
+source("libs.spatial.r")
+utm43n = "+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs"
+#'make data sf
+cvore.sf = st_as_sf(cvore.rev, coords = c("xutm", "yutm"))
+st_crs(cvore.sf) = utm43n
+
+#'subeset with only id and make spatial
+cvore.sp = as(cvore.sf %>% dplyr::select(id), "Spatial")
+```
+
+## apply kernel UD
+
+```{r}
+#'get the kernel ud
+cvore.kde = kernelUD(cvore.sp, hlim = "LSCV")
+
+#'get vertices
+cvore.range = getverticeshr(cvore.kde, percent = 95)
+```
+
+## export polygons
+
+```{r}
+#'export polygons to shapefile
+#writeOGR(cvore.range, dsn = ".", layer = "cvore.95polygons", driver = "ESRI Shapefile")
+```
+
+# biotic env data
+
+## number of homeranges overlapped
+
+```{r}
+#'first make the raster a spatial grid df
+cvore.rev$overlap = over(cvore.sp, cvore.range, fn = function(x) length(unique(x)))
+
+cvore.rev$overlap = cvore.rev$overlap[,1]
+```
+
+## land-use class
+
+```{r}
+#'get landuse class at each point and save as rdata
+cvore.rev$landuse = extract(cvore.landuse, cvore.sp, fun = first, na.rm = T)
+```
+
+# abiotic data
+
+## distance from settlements
+
+```{r}
+#'load settlements
+settle = st_read("Shapefiles/Settlements/Settlements.shp")
+
+#'get distance from centroid to each point
+cvore.rev$settledist = apply(spDists(coordinates(cvore.sp), centroid(as(settle, "Spatial"))), 1, min)
+```
+
+## assign landuse
+
+```{r}
+#'assign landuse by class
+a = levels(cvore.landuse)
+a = bind_rows(a)
+
+#'leftjoin
+cvore = left_join(cvore.rev, a, by = c("landuse"="ID"))
+```
+
+
+```{r}
+#'save data
+save(cvore.rev, file = "cvore.full.rdata")
+```
+

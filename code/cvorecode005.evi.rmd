@@ -1,0 +1,70 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+
+## load bands from sentinel
+
+```{r}
+source("libs.spatial.r")
+library(rgdal)
+#'load sentinel 2 bands using rgdal
+band.nir = readGDAL("S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/GRANULE/L1C_T43QDA_A013115_20171226T054142/IMG_DATA/T43QDA_20171226T053231_B08.jp2")
+band.red = readGDAL("S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/GRANULE/L1C_T43QDA_A013115_20171226T054142/IMG_DATA/T43QDA_20171226T053231_B04.jp2")
+band.blue = readGDAL("S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/GRANULE/L1C_T43QDA_A013115_20171226T054142/IMG_DATA/T43QDA_20171226T053231_B02.jp2")
+
+#'make raster
+band.nir = raster(band.nir)
+band.red = raster(band.red)
+band.blue = raster(band.blue)
+
+#'stack
+sentinel.stack = stack(band.nir, band.red, band.blue)
+```
+
+## load extent
+
+```{r}
+#'read extent
+ext = readShapeSpatial("bmt_studyarea/BMT extent.shp")
+#'set crs
+crs(ext) = crs(sentinel.stack)
+#'get extent
+ext = extent(ext)
+
+#'subset raster to ext
+sentinel.stack = crop(sentinel.stack, ext)
+```
+
+
+# get evi
+
+## get evi
+```{r}
+library(RStoolbox)
+#'see https://www.sentinel-hub.com/eoproducts/evi-enhanced-vegetation-index-0 for constants; G = 2.5, C1 = 6, C2 = 7.5, L = 1
+#' see ~/S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/DATASTRIP/DS_MTI__20171228T153909_S20171226T054142/MTD_DS.xml for the scale factor, 10000
+
+#'get evi
+#evi = 2.5*(band.nir - band.red) / (band.nir + 6*band.red - 7.5*band.blue + 1)
+evi = spectralIndices(sentinel.stack, nir = 1, red = 2, blue = 3, scaleFactor = 1e4, L_evi = 1, C1 = 6, C2 = 7.5, G = 2.5)
+
+```
+
+## export
+
+```{r}
+#'save evi as raster
+writeRaster(evi, filename = "evi.tif", "GTiff")
+```
+

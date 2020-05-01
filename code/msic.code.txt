@@ -1,0 +1,51 @@
+## get Hlscvs
+
+```{r}
+#'lapply Hlscv over the list. nb: Hlscv (with capital H) is the multivariate selector we need, while hlscv is a univariate selector and doesn't work on this data. why? i'm not sure.
+cvore.lscv = lapply(cvore.coords, function(x) Hlscv(x=x))
+```
+
+```{r}
+#'get the kde over the list, calling the corresponding element from cvore.lscv, placing in a new list cvore.kde
+cvore.kde = list()
+for(i in 1:length(cvore.lscv)){
+  cvore.kde[[i]] = ks::kde(x=cvore.coords[[i]], H = cvore.lscv[[i]], compute.cont = T)
+}
+```
+
+## save kdes and lscvs as rdata
+
+```{r}
+#'save and sync to github
+save(cvore.kde, cvore.coords, cvore.lscv, file = "carnivore_kde_data.rdata")
+```
+
+## get 95% contours
+
+```{r}
+#'first evaluate the 95% contour for all kdes
+cvore.util.raster = lapply(cvore.kde, function(x){
+  image2Grid(list(x = x$eval.points[[1]], y = x$eval.points[[2]], z = x$estimate/max(a$estimate)))
+})
+
+#'assign names
+names(cvore.cont95) = names(cvore.coords)
+```
+
+## make polygons and export
+
+```{r}
+#use sp and rgeos
+#'first make a closed polygon using the xy coordinates
+cvore.polygon95 = lapply(cvore.cont95, function(x){
+  a = data.frame(x$x, x$y)
+  rbind(a, a[1,])
+  Polygons(list(Polygon(a)), ID = "a")
+})
+
+#'then covert to spatialpolygons
+for(i in 1:18){
+  cvore.polygon95[[i]]@ID = names(cvore.cont95)[i]
+  cvore.polygon95[[i]] = SpatialPolygons(list(cvore.polygon95[[i]]))
+}
+```mi

@@ -1,0 +1,60 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+source("libs.spatial.r")
+```
+
+## load ground points
+
+```{r}
+#'load as csv
+gtruth = read_csv("Groundtruth_Dec 2017.csv")
+
+#'make sf
+gt.sf = st_as_sf(gtruth, coords = c("X","Y"))
+#'set crs
+st_crs(gt.sf) = 4326
+#'transform
+gt.sf.utm = st_transform(gt.sf, 32643)
+```
+
+## export to shapefile
+
+```{r}
+#'export
+st_write(gt.sf.utm, "groundtruth_points_utm", driver = "ESRI Shapefile", delete_layer = T)
+```
+
+# create env raster stack
+
+```{r}
+#'list files and load all
+sentinel.files = list.files("S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/GRANULE/L1C_T43QDA_A013115_20171226T054142/IMG_DATA/", pattern = ".jp2", full.names = T)
+
+#'load all with rgdal
+cvore.env = lapply(sentinel.files, readGDAL)
+
+#'make raster
+cvore.env = lapply(cvore.env, raster)
+
+#'make rasterbrick
+cvore.env = brick(cvore.env)
+
+#'crop to extent
+ext = readShapePoly("bmt_studyarea/BMT extent.shp")
+cvore.env = raster::crop(x = cvore.env, y = ext)
+#'save as rdata
+save(cvore.env, file ="cvore.env.rdata")
+```
+
+
+

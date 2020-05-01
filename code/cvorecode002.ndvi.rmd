@@ -1,0 +1,65 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+library(pals)
+```
+
+
+## load bands from sentinel
+
+```{r}
+source("libs.spatial.r")
+library(rgdal)
+#'load sentinel 2 bands using rgdal
+band.nir = readGDAL("S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/GRANULE/L1C_T43QDA_A013115_20171226T054142/IMG_DATA/T43QDA_20171226T053231_B08.jp2")
+band.red = readGDAL("S2A_MSIL1C_20171226T053231_N0206_R105_T43QDA_20171228T153909.SAFE/GRANULE/L1C_T43QDA_A013115_20171226T054142/IMG_DATA/T43QDA_20171226T053231_B04.jp2")
+
+#'make raster
+band.nir = raster(band.nir)
+band.red = raster(band.red)
+
+#'stack
+sentinel.stack = stack(band.nir, band.red)
+```
+
+## load extent
+
+```{r}
+#'read extent
+ext = readShapeSpatial("bmt_studyarea/BMT extent.shp")
+#'set crs
+crs(ext) = crs(sentinel.stack)
+#'get extent
+ext = extent(ext)
+
+#'subset raster to ext
+sentinel.stack = crop(sentinel.stack, ext)
+```
+
+
+# get ndvi
+
+## get ndvi
+```{r}
+library(RStoolbox)
+
+#'get spectral indices
+ndvi = spectralIndices(sentinel.stack,red = 2, nir = 1, indices = "NDVI")
+
+```
+
+## export as raster
+```{r}
+#'export ndvi raster
+writeRaster(ndvi, filename = "cvore.ndvi.tif","GTiff")
+```
+

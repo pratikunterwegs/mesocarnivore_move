@@ -1,0 +1,117 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+## load rev data
+
+```{r}
+#'load as rdata
+load("cvore.revisits.rdata")
+```
+
+## load background
+
+```{r}
+source("libs.spatial.r")
+#'load evi raster layer
+cvore.ndvi = raster("cvore.ndvi.tif")
+
+#'load settlements
+settle = st_read("Shapefiles/Settlements/Settlements.shp")
+#'make a 500m buffer around them
+settle.buffer = st_buffer(settle, dist = 5e2)
+
+#'load extent obj
+ext = st_read("bmt_studyarea/BMT extent.shp")
+
+#'get the coordinate systems
+wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+utm43n = "+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs"
+
+#'distance between each raster cell and the settlement buffer
+settledist = spDists(coordinates(cvore.ndvi), centroid(as(settle.buffer, "Spatial")))
+#'get the minimum distance
+cvore.ndvi$settledist = apply(settledist, 1, min)
+```
+
+# exploration
+
+## extract evi for all locs
+
+```{r}
+source("libs.spatial.r")
+#'get evi values at each point
+cvore.sp = cvore.rev
+#'make spatial
+
+coordinates(cvore.sp) = ~xutm+yutm
+crs(cvore.sp) = utm43n
+
+#'extract values from evi
+env = extract(cvore.ndvi, cvore.sp)
+
+#'convert to sf
+cvore.sf = st_as_sf(cvore.sp)
+#'bind columns
+cvore.sf = cbind(cvore.sf, env)
+#'make env df
+env.df = as.data.frame(cvore.ndvi)
+
+```
+
+## density plot of available and used evi
+
+```{r}
+#'plot densities
+
+cairo_pdf(filename = "fig3ndvi_avail_used.pdf", height = 5, width = 5)
+#'plot
+ggplot()+
+  geom_density(data = cvore.sf, aes(x = cvore.ndvi, fill = sp), position = "identity", alpha = 0.6, col = "transparent")+
+  scale_fill_manual(values = viridis(3))+
+  stat_density(data = env.df, aes(x = cvore.ndvi), position = "identity", lwd = 0.3, geom = "line",col = "grey20")+
+  labs(list(x = "NDVI", y = "Probability density", fill = "Spp."))+
+  g2+
+  theme(legend.position = "top", legend.text = element_text(face = "italic"))
+
+dev.off()
+```
+
+## distance to settlements
+
+```{r}
+#'plot density plots of distance to settlements
+ggplot()+
+  geom_density(data = cvore.sf, aes(x = settledist, fill = sp), position = "identity", alpha = 0.3, col = "transparent")+
+  scale_fill_manual(values = viridis(3))+
+  stat_density(data = env.df, aes(x = settledist), position = "identity", lwd = 0.6, geom = "line",col = "grey20")+
+  labs(list(x = "Distance to settlement (m)", y = "Probability density", fill = "Spp."))+
+  g2+
+  theme(legend.position = "top", legend.text = element_text(face = "italic"))
+```
+
+## relate revisits, residence, and speed to ndvi
+
+```{r}
+#'plot smooths of revisits, residence, speed
+
+a = cvore.sf %>% group_by(id, ndvi = round_any(cvore.ndvi, 0.025))%>% 
+  dmap_at(., c(mean, sd), c("speed","revisits","residence"))
+
+ggplot()+
+  geom_smooth(aes(x = cvore.ndvi, y = revisits, col = sp, fill = sp))+
+  scale_fill_manual(values = viridis(3))+
+  scale_colour_manual(values = viridis(3))+
+  coord_cartesian(ylim = c(0,500))
+```
+

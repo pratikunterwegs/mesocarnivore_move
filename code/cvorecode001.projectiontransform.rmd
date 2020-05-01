@@ -1,0 +1,160 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+library(pals)
+```
+
+## load data
+
+```{r}
+#'load location data
+
+cvorelocs = read_csv("carnivore_locs.csv")
+
+#'subset cols
+cvorelocs = cvorelocs %>% select(event = `event-id`,long = `location-long`,lat = `location-lat`,sp = `individual-taxon-canonical-name`, tag = `tag-local-identifier`, id = `individual-local-identifier`, time = timestamp)
+
+#'short animal names
+library(stringr)
+
+cvorelocs =cvorelocs %>% mutate(no = str_sub(id, -2,-1), id = paste(ifelse(substr(id, 1, 3) == "Fox","Fox", ifelse(substr(id, 1,3) == "Jac", "Jak","Cat")), no))
+
+#'convert time to posixct
+cvorelocs = cvorelocs %>% mutate(time = as.POSIXct(time, tz = "IST", format = "%d/%m/%Y %H:%M"), hour = hour(time), year = year(time))
+```
+
+# summarise
+
+## check per indiv
+
+```{r}
+png(filename = "fig01.fix.heatmap.png", height = 800, width = 1600, res = 300)
+#'nlocs per animal per year and heatmap
+count(cvorelocs, id,year) %>% 
+  ggplot()+
+  geom_tile(aes(x = id, y = year, fill = n), col = "grey90", lwd = 0.5)+g2+theme(axis.text.x = element_text(angle = 35, hjust = 1, size = 8, family = "monospace"), legend.position = "top", legend.text = element_text(size = 6))+
+  scale_fill_gradientn(colours = viridis(20))+
+  labs(list(x = "Animal",y = "Year",fill = "Fixes"))
+
+dev.off()
+```
+
+# transform
+
+## make spatial
+```{r}
+#make spatial
+source("libs.spatial.r")
+wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+utm43n = "+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs"
+
+#'remove missing locs
+cvorelocs = cvorelocs %>% filter(!is.na(long), !is.na(lat))
+#'make spatial
+coordinates(cvorelocs)=~long+lat
+crs(cvorelocs) = wgs84
+```
+
+## transform to utm 43n
+
+```{r}
+#'transform to utm 43n
+coords.utm = coordinates(spTransform(cvorelocs, CRSobj = crs(utm43n)))
+
+cvorelocs = as.data.frame(cvorelocs) %>% mutate(xutm = as.numeric(coords.utm[,1]), yutm = as.numeric(coords.utm[,2]))
+```
+
+# move object
+
+```{r}
+library(move)
+#'arrange by id, time
+cvorelocs = cvorelocs %>% arrange(id, time) %>% filter(year == 2017)
+
+#'convert to a move object by id and get basic move parameters
+cvore.move = move(x = cvorelocs$xutm, y = cvorelocs$yutm,time = cvorelocs$time, proj = utm43n, animal = cvorelocs$id, data = cvorelocs)
+
+#'split the movestack and get lag, speed, angle
+cvore.move = split(cvore.move)
+#'initiate loop
+for(i in 1:length(cvore.move)){
+  x = cvore.move[[i]]
+  cvore.move[[i]]$lag = c(NA,timeLag(x), units = "mins")
+  cvore.move[[i]]$speed = c(NA, speed(x))
+  cvore.move[[i]]$angle = c(NA, angle(x))
+}
+
+#'make df
+cvore = cvore.move %>% 
+  lapply(., function(x) cbind(x@idData, x@data)) %>% 
+  bind_rows() %>% 
+  arrange(id, time)
+
+```
+
+
+## export to csv
+```{r}
+write.csv(cvore, file = "carnivore_locs_utm.csv")
+
+save(cvore, file = "cvore.rdata")
+```
+
+
+# make spatial lines
+
+## by id
+```{r}
+#'for some reason map doesn't work here, using lapply
+#'split by id
+cvore.lines = cvorelocs %>% filter(year == 2017) %>% 
+  dlply("id") %>% 
+  lapply(., function(x) Line(cbind(x$xutm, x$yutm))) 
+  
+#'assign placeholder id
+cvore.lines = cvore.lines %>% 
+ lapply(., function(x) Lines(x, ID = "a"))
+
+#' assign real names
+for(i in 1:length(cvore.lines)){
+  cvore.lines[[i]]@ID = names(cvore.lines)[i]
+}
+
+#' get names
+names = names(cvore.lines)
+
+#'make spatial lines
+cvore.lines = SpatialLines(cvore.lines, proj4string = CRS(utm43n))
+
+library(stringi)
+
+#' get data for splinesdf
+data = data.frame(cbind(id = 1:length(cvore.lines), name = names, sp = as.character(substr(names, 1, 3))))
+#'assign rownames
+rownames(data) = names
+#'make splinesdf
+cvore.lines = SpatialLinesDataFrame(cvore.lines, data = data)
+
+#'export
+library(rgdal)
+
+#'export lines by species
+writeOGR(cvore.lines, dsn = ".", layer = "cvore.lines17.id",driver = "ESRI Shapefile", overwrite_layer = T)
+
+
+writeOGR(cvore.lines[cvore.lines$sp == "Fox",], dsn = ".", layer = "fox.lines17.id",driver = "ESRI Shapefile", overwrite_layer = T)
+
+writeOGR(cvore.lines[cvore.lines$sp == "Cat",], dsn = ".", layer = "cat.lines17.id",driver = "ESRI Shapefile", overwrite_layer = T)
+
+writeOGR(cvore.lines[cvore.lines$sp == "Jak",], dsn = ".", layer = "jack.lines17.id",driver = "ESRI Shapefile", overwrite_layer = T)
+```
+

@@ -1,0 +1,85 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+source("libs.spatial.r")
+```
+
+## read shapefile
+```{r}
+gt.sf.utm = st_read("groundtruth_points_utm/groundtruth_points_utm.shp")
+```
+
+
+# create training buffer and points
+
+```{r}
+#'select a subset of each class for a total of 21-22 points (30% of each class)
+#'first rename the class
+gt.sf.utm = gt.sf.utm %>% rename(class = `Class.Name`) %>% dplyr::select(-Date, -Remarks)
+
+#'count classes
+count(gt.sf.utm, class)
+
+#'rename factors
+gt.sf.utm = gt.sf.utm %>% mutate(class = revalue(class, c(Fallow = "bare", Grain = "agri_closed", Grassland = "grassland", Horticulture = "agri_open", Plantation = "agri_open", Sugarcane = "agri_closed", Veg = "agri_open")))
+
+#'select 3 from each
+#gt.training = gt.sf.utm %>% group_by(class) %>% sample_frac(0.3) %>% st_sf() %>% ungroup()
+
+#'make 30m buffer
+gt.training.buffer = st_buffer(gt.sf.utm, dist = 2.5)
+
+#'get validation buffers
+#gt.validation = st_buffer(gt.sf.utm, dist = 10)
+#'remove training points from this
+#gt.validation = gt.validation[!gt.validation$ID %in% gt.training.buffer$ID,]
+```
+
+# load raster
+
+```{r}
+#'load saved rdata
+load("cvore.env.rdata")
+```
+
+# classification
+
+## rf supervised classification
+
+```{r}
+#'load randomforest
+library(randomForest)
+
+#'make training buffer spatial polygons
+gt.training.buffer.sp = as(gt.training.buffer, 'Spatial')
+```
+
+```{r}
+#'run classification
+cvore.landuse = superClass(img = cvore.env, model = "rf", trainData = gt.training.buffer.sp, responseCol = "class")
+```
+
+## plot to check
+
+```{r}
+#'check classification
+plot(cvore.landuse$map)
+
+#'make factor
+cvore.landuse.map = cvore.landuse$map
+
+#'map values to factors
+revalue(cvore.landuse.map@data@values, c()
+
+#'export to check
+writeRaster(cvore.landuse$map, "cvore.landuse.tif","GTiff", overwrite=T)
+```

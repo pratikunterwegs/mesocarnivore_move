@@ -1,0 +1,356 @@
+---
+editor_options: 
+  chunk_output_type: inline
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+## load full data
+
+```{r}
+#'load as rdata
+load("cvore.full.rdata")
+utm43n = "+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs"
+
+library(sf)
+#'make spatial, get ndvi
+cvore.sf = st_as_sf(cvore.rev, coords = c("xutm", "yutm"))
+st_crs(cvore.sf) = utm43n
+
+#'subeset with only id and make spatial
+cvore.sp = as(cvore.sf %>% dplyr::select(id), "Spatial")
+
+```
+
+## load background
+
+```{r}
+source("libs.spatial.r")
+#'load evi raster layer
+cvore.ndvi = raster("cvore.ndvi.tif")
+cvore.landuse = raster("cvore.landuse.tif")
+
+#'get ndvi for cvores
+cvore.rev$ndvi = extract(cvore.ndvi, cvore.sp)
+
+env = data.frame(ndvi = as.vector(cvore.ndvi), landuse = as.vector(cvore.landuse))
+
+#'get factors for landuse
+landuse.class = bind_rows(levels(cvore.landuse))
+#'left join with cvore.rev
+cvore = left_join(cvore.rev, landuse.class, by = c("landuse"="ID"))
+#'leftjoin with env
+env = env %>% left_join(., landuse.class, by = c("landuse"="ID"))
+env$env = "env"
+
+#'make species common names
+cvore$sp = mapvalues(cvore$sp, c("Felis chaus","Vulpes bengalensis","Canis aureus"), c("Jungle cat","Indian fox","Golden jackal"))
+```
+
+## colour palette
+
+```{r}
+vcols3 = viridis(10)[c(2,6,10)]
+```
+
+
+## fixes per month
+
+```{r}
+#png(filename = "fix.heatmap.day.#png", height = 1600, width = 2000, res = 400)
+
+count(cvore, id,day = round(as.numeric(julian(cvore$time, origin = as.POSIXct("2017-01-01",tz="IST"))))) %>% 
+  ggplot()+
+  geom_tile(aes(x = id, y = day, fill = n))+
+  g2+
+  theme(axis.text.x = element_text(angle = 35, hjust = 1, size = 8, family = "monospace"), legend.position = "top", legend.text = element_text(size = 6))+
+ scale_fill_gradientn(colours = rev(brewer.pal(9, "RdBu")))+
+  labs(list(x = "Animal",y = "2017 days",fill = "Fixes"))
+
+#dev.off()
+```
+
+
+## density plot of available and used evi
+
+```{r}
+#'plot densities
+
+#cairo_pdf(filename = "fig3ndvi_avail_used.pdf", height = 5, width = 5)
+#png(filename = "ndvi_avail_used.#png", height = 1600, width = 2000, res = 400)
+#'plot
+ggplot()+
+  geom_density(data = cvore, aes(x = ndvi, fill = sp), position = "identity", alpha = 0.6, col = "transparent")+
+  scale_fill_manual(values = vcols3)+
+  stat_density(data = env, aes(x = ndvi), position = "identity", lwd = 0.5, geom = "line",col = "grey20")+
+  labs(list(x = "NDVI", y = "Probability density", fill = "Spp."))+
+  g2+
+  theme(legend.position = "top", legend.text = element_text(face = "italic"))
+
+#dev.off()
+```
+
+## landuse and ndvi
+
+```{r}
+#'landuse classes
+ggplot()+
+  geom_violin(data = env, aes(x = category, y = ndvi))+
+  labs(list(x = "Landuse",y = "NDVI"))+
+  g2
+```
+
+## used and available landuse
+
+```{r}
+#'used and available landuse classes
+ggplot()+
+  geom_bar(data = cvore, aes(x = sp, fill = category), position = "fill")+
+  geom_bar(data = env, aes(x = env, fill = category), position = "fill")+
+  scale_fill_manual(values = c(terrain.colors(5)[1:4],"royalblue"))+
+  g2+
+  theme(legend.position = "top", axis.text.x = element_text(face="italic"))+
+  labs(list(x= NULL, y = "Proportion", fill = "Landuse"))
+```
+
+# relate revisits, residence, and speed to landuse
+
+## residence distributions
+
+```{r}
+#'density plot residence
+ggplot()+
+  stat_density(data = cvore, aes(x = residence, col = sp), position = "identity", alpha = 1, geom = "line")+
+  scale_colour_manual(values = vcols3)+
+  #stat_density(data = env, aes(x = ndvi), position = "identity", lwd = 0.5, geom = "line",col = "grey20")+
+  labs(list(x = "Residence time (hrs)", y = "Probability density", fill = "Spp."))+
+  xlim(0,1000)+
+  g2+
+  theme(legend.position = "top", legend.text = element_text(face = "italic"))
+```
+
+## residence and landuse
+
+```{r}
+#'plot boxplots of revisits, residence, speed
+#png(filename = "residence.landuse.#png", height = 1600, width = 2000, res = 400)
+
+ggplot()+
+  geom_boxplot(data = cvore, aes(x = category, y = residence, fill = sp),col = 1, position = position_dodge(width = 0.7), lwd = 0.3, outlier.size = 0.2)+
+  scale_fill_manual(values = viridis(10)[c(2,6,10)])+
+ # scale_colour_manual(values = viridis(3))+
+  coord_cartesian(ylim = c(0,2e3))+
+  labs(list(x = "Landuse",y = "Residence time (hrs)"))+
+  g1
+
+#dev.off()
+```
+
+## revisit distributions
+
+```{r}
+#'density plot revisits
+ggplot()+
+  stat_density(data = cvore, aes(x = revisits, fill = sp), position = "identity", alpha = .6)+
+  scale_fill_manual(values = vcols3)+
+  #stat_density(data = env, aes(x = ndvi), position = "identity", lwd = 0.5, geom = "line",col = "grey20")+
+  labs(list(x = "Residence time (hrs)", y = "Probability density", fill = "Spp."))+
+ # xlim(0,1000)+
+  g2+
+  theme(legend.position = "top", legend.text = element_text(face = "italic"))
+```
+
+## revisits and landuse
+
+```{r}
+#png(filename = "revisits.landuse.#png", height = 1600, width = 2000, res = 400)
+
+ggplot()+
+  geom_boxplot(data = cvore, aes(x = category, y = revisits, fill = sp),col = 1, position = position_dodge(width = 0.7), lwd = 0.3, outlier.size = 0.2)+
+  scale_fill_manual(values = viridis(10)[c(2,6,10)])+
+ # scale_colour_manual(values = viridis(3))+
+  coord_cartesian(ylim = c(0,5e2))+
+  labs(list(x = "Landuse",y = "# revisits"))+
+  g1
+
+#dev.off()
+```
+
+## speed distribution
+
+```{r}
+#'density plot speed
+#png(filename = "distribution.speed.#png", height = 1600, width = 2000, res = 400)
+
+ggplot()+
+  stat_density(data = cvore, aes(x = speed*3600, col = sp), position = "identity", geom="line", lwd = 0.6)+
+  scale_colour_manual(values = vcols3)+
+  #stat_density(data = env, aes(x = ndvi), position = "identity", lwd = 0.5, geom = "line",col = "grey20")+
+  labs(list(x = "Speed (m/hr)", y = "Probability density", colour = "Spp."))+
+  xlim(0,4000)+
+  g2+
+  theme(legend.position = "top", legend.text = element_text(face = "italic"))
+
+#dev.off()
+```
+
+## speed and landuse
+
+```{r}
+#png(filename = "speed.landuse.#png", height = 1600, width = 2000, res = 400)
+
+ggplot()+
+  geom_boxplot(data = cvore, aes(x = category, y = speed*3600, fill = sp),col = 1, position = position_dodge(width = 0.7), lwd = 0.3, outlier.size = 0.2)+
+  scale_fill_manual(values = viridis(10)[c(3,6,10)])+
+ # scale_colour_manual(values = viridis(3))+
+  coord_cartesian(ylim = c(0,5000))+
+  labs(list(x = "Landuse", y = "Speed (m/hr)"))+
+  g1
+
+#dev.off()
+```
+
+# move object
+
+```{r}
+library(move)
+#'arrange by id, time
+cvore = cvore %>% arrange(id, time) %>% filter(year == 2017)
+utm43n = "+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs"
+
+#'convert to a move object by id and get basic move parameters
+cvore.move = move(x = cvore$xutm, y = cvore$yutm,time = cvore$time, proj = utm43n, animal = cvore$id, data = cvore)
+
+#'split the movestack and get lag, speed, angle
+cvore.move = split(cvore.move)
+#'initiate loop
+for(i in 1:length(cvore.move)){
+  x = cvore.move[[i]]
+  cvore.move[[i]]$lag = as.numeric(c(timeLag(x), units = "mins"))
+  cvore.move[[i]]$distance = c(distance(x),NA)
+}
+
+#'make df
+cvore = cvore.move %>% 
+  lapply(., function(x) cbind(x@idData, x@data)) %>% 
+  bind_rows() %>% 
+  arrange(id, time)
+
+```
+
+# distribution of lags by species
+
+```{r}
+#'get lag quantiles
+cvore %>% dlply("sp") %>% lapply(., function(x) quantile(x$lag, na.rm=T, probs = seq(0,1,0.05)))
+
+#png(filename = "lag.density.#png", height = 1600, width = 2000, res = 400)
+
+#'plot lag dist density plots, remove all lags above 360 (6 hours)
+ggplot()+
+  stat_density(data = cvore %>% filter(lag <= 360), aes(x = lag), geom = "line")+
+  labs(list(x = "Fix interval (mins)"))+
+  facet_wrap(~sp)+
+  g2+
+  theme(strip.background=element_blank(), strip.text = element_text(colour = 1, face = "italic"))
+
+#dev.off()
+```
+
+## timelag vs hour of day
+
+```{r}
+#'plot lag dist density plots, remove all lags above 360 (6 hours)
+#png(filename = "density.hour.#png", height = 1600, width = 2000, res = 400)
+
+cvore %>% filter(lag <= 360) %>% group_by(sp, hour) %>% summarise(lagm = mean(lag, na.rm = T), sd = sd(lag, na.rm = T), n = length(lag)) %>% mutate(ci = qnorm(0.975)*sd/sqrt(n)) %>% 
+
+ggplot()+
+  geom_pointrange(aes(x = hour, y = lagm, ymin = lagm-ci, ymax=lagm+ci), lwd = 0.2, size = 0.2)+
+  labs(list(x = "Hour of day", y = "Fix interval (mins)"))+
+  facet_wrap(~sp)+
+  g2+
+  theme(strip.background=element_blank(), strip.text = element_text(colour = 1, face = "italic"))
+
+#dev.off()
+```
+
+# effect of ndvi, distance to settlements, and overlap
+
+## prep data
+
+```{r}
+#'residence, revisits, speed at ndvi: melt the data, with closely spaced means for ndvi etc
+cvore.melt = cvore %>% filter(lag <=360) %>% group_by(ndvi = round_any(ndvi, 0.05), settledist = round_any(settledist, 100), overlap) %>%
+  melt(id.vars = c("sp","id","ndvi","settledist","overlap"), measure.vars = c("speed","lag","revisits","residence"))
+
+#'get mean values for ndvi
+cvore.melt.ndvi = cvore.melt %>% group_by(sp,ndvi,variable) %>% summarise(m = mean(value), sd = sd(value), n = length(value)) %>% mutate(ci = qnorm(0.975)*sd/sqrt(n)) 
+
+#'mean values for settlement distance
+cvore.melt.settledist = cvore.melt %>% group_by(sp,settledist,variable) %>% summarise(m = mean(value), sd = sd(value), n = length(value)) %>% mutate(ci = qnorm(0.975)*sd/sqrt(n))
+
+#'mean values for overlap
+cvore.melt.overlap = cvore.melt %>% group_by(sp,overlap,variable) %>% summarise(m = mean(value), sd = sd(value), n = length(value)) %>% mutate(ci = qnorm(0.975)*sd/sqrt(n))
+```
+
+## plot data
+
+```{r}
+#'plot
+#png(filename = "movevars.ndvi.#png", height = 1600, width = 2000, res = 400)
+#'mean values ~ ndvi ~ sp
+ggplot()+
+  geom_pointrange(data = cvore.melt.ndvi, aes(x = ndvi, y = m, ymin = m-ci, ymax = m+ci, fill = sp), lwd = 0.2, size = 3, pch = 21, stroke = 0.2, fatten = 12)+
+  scale_fill_manual(values = viridis(3))+
+  facet_grid(variable~sp, scales = "free")+
+  labs(list(x = "NDVI", y = "Value"))+
+  g1+
+  theme(strip.text = element_text(colour=1))
+
+#dev.off()
+```
+
+## plot data
+
+```{r}
+#
+#png(filename = "movevars.settlement.#png", height = 1600, width = 2000, res = 400)
+#'mean values ~ settledist ~ sp
+ggplot()+
+  geom_pointrange(data = cvore.melt.settledist, aes(x = settledist, y = m, ymin = m-ci, ymax = m+ci, fill = sp), lwd = 0.2, size = 3, pch = 21, stroke = 0.2, fatten = 12)+
+  scale_fill_manual(values = viridis(3))+
+  facet_grid(variable~sp, scales = "free")+
+  labs(list(x = "Distance to settlement (m)", y = "Value"))+
+  xlim(0,2000)+
+  g1+
+  theme(strip.text = element_text(colour=1))
+
+#dev.off()
+```
+
+## plot data
+
+```{r}
+#png(filename = "movevars.overlap.#png", height = 1600, width = 2000, res = 400)
+
+#'mean values ~ overlap ~ sp
+ggplot()+
+  geom_violin(data = cvore.melt %>% filter(!is.na(overlap)), aes(x = as.factor(overlap), y = value), lwd = 0.2, size = 3, pch = 21, stroke = 0.2, fatten = 12)+
+  scale_fill_manual(values = viridis(3))+
+  facet_grid(variable~sp, scales = "free", drop = T)+
+  labs(list(x = "Overlap #", y = "Value"))+
+  g1+
+  theme(strip.text = element_text(colour=1))
+
+#dev.off()
+```
+
+

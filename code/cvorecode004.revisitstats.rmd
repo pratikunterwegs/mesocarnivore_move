@@ -1,0 +1,64 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# prep session
+
+## load libs
+```{r}
+#'load libs
+source("libs.R")
+source("ggplot.opts.r")
+```
+
+## load revisit data
+
+```{r}
+#'load from csv
+revisits = list.files(pattern = "revisit_")
+
+revisits = lapply(revisits, read_csv)
+
+#'assign names
+names = unlist(lapply(revisits, function(x) unique(x$id)))
+
+names(revisits) = names
+
+#'bind rows
+revisits = revisits %>% bind_rows()
+```
+
+## load base data
+
+```{r}
+#'load cvore rdata obj
+load("cvore.rdata")
+
+#'gt numeric time
+cvore$timenum = as.numeric(cvore$time)
+
+#'get revisit values
+cvore.rev = left_join(cvore, revisits, by = c("id","timenum" = "time"))
+```
+
+## save cvore revisit data
+
+```{r}
+#'save as rdata
+save(cvore.rev, file = "cvore.revisits.rdata")
+
+#'as csv
+write_csv(cvore.rev, path = "cvore.revisits.csv")
+```
+
+## save as shapefile
+
+```{r}
+#'save as shp all together
+source("libs.spatial.r")
+library(rgdal)
+coordinates(cvore.rev)=~xutm+yutm
+writeOGR(cvore.rev, dsn = ".", layer = "cvore.revs",driver = "ESRI Shapefile", overwrite_layer = T)
+```
+
